@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>iMakeUP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        .card img:hover {
+            transform: rotateZ(15deg) scale(1.5);
+            color: rgba(255, 166, 0, 0.753);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-dark shadow-lg pb-0" style="border-radius:0;">
+        <div class="container-fluid pb-0">
+            <a class="navbar-brand  text-white" href="#">iMakeUP</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent pb-0">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link  text-white" href="#">Link</a>
+                    </li>
+
+                </ul>
+                <div class="d-flex " style="width:50%;float:right;">
+                    <input class="form-control me-2 bg-dark text-white" id="searchitem" type="search"
+                        onkeyup="SearchItem()" placeholder="Search" aria-label="Search">
+
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container my-3">
+        <h1 style="color:blue;">Some Populer Makeup Products</h1>
+        <div class="row" id="mameupdata">
+
+        </div>
+
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
+    <script>
+        let alldata = null
+        let response = fetch("http://makeup-api.herokuapp.com/api/v1/products.json?brand=maybelline")
+
+        response.then((value) => {
+            return value.json()
+        }).then((data) => {
+            alldata = data
+            pushdata(alldata);
+
+
+        })
+
+        function pushdata(data) {
+            let htmlstr = ""
+            let makeup = document.getElementById("mameupdata");
+            for (item in data) {
+                // console.log(item.id)
+                console.log(data[item])
+                htmlstr += `  <div class="card mb-3 mx-2 my-2 shodow-lg" style="max-width: 540px;">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img  src="${data[item].api_featured_image}" class="img-fluid rounded-start" alt="...">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">${data[item].name}</h5>
+                            <p class="card-text">Brand: <span style="color:orange;">${data[item].brand.slice(0, 1).toUpperCase() + data[item].brand.slice(1)}</span></p>
+                            <p class="card-text">${data[item].description.slice(0,150)}...</p>
+                            ${rating(data[item].rating)}
+                                
+                            <p class="card-text" ><span style="font-size:20px;color:blue;"><strong>${data[item].price} $</strong></span></p>
+                            <p class="card-text"><small class="text-muted"> <strong>Created:</strong> ${data[item].created_at} <strong> Update:</strong>${data[item].updated_at}</small></p>
+                            <a  href="${data[item].product_link}" class="btn btn-dark">Explore now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>`
+
+            }
+            makeup.innerHTML = htmlstr;
+        }
+
+        function rating(itrate) {
+            if (!itrate){
+                return ""
+            }
+            let str = '<p class="card-text" style="display:inline;">'
+            for (let i = 0; i < 5; i++) {
+                if (i < itrate) {
+                    if (itrate <= i + 0.5) {
+                        str += '<span class="fa fa-star-half-full" style="color:orange;"></span>'
+                    } else {
+                        str += '<span class="fa fa-star" style="color:orange;" ></span> '
+                        
+                    }
+                }
+                else{
+                    str += '<span class="fa fa-star"></span> '
+
+                }
+
+            }
+            str += ` <span style="font-size:20px;color:orange;text-decoration:rgba(255, 166, 0, 0.4) underline;margin-left:5px;">${(itrate)?itrate:""}</span></p>\n`
+            console.log(str)
+            return str
+        }
+
+        function SearchItem() {
+            let htmlstr = ""
+            let makeup = document.getElementById("mameupdata");
+            let search = document.getElementById("searchitem").value.toLowerCase();
+            let data = alldata
+            for (item in alldata) {
+                if (data[item].name.toLowerCase().search(search) != -1 || data[item].description.toLowerCase().search(search) != -1 || data[item].brand.toLowerCase().search(search) != -1 || data[item].price.toLowerCase().search(search) != -1 || data[item].created_at.toLowerCase().search(search) != -1 || data[item].updated_at.toLowerCase().search(search) != -1) {
+
+                    htmlstr += `<div class="card mb-3 mx-2 my-2 shodow-lg" style="max-width: 540px;">
+                                <div class="row g-0">
+                                <div class="col-md-4">
+                                <img  src="${data[item].api_featured_image}" class="img-fluid rounded-start" alt="...">
+                                </div>
+                                <div class="col-md-8">
+                                <div class="card-body">
+                                <h5 class="card-title">${data[item].name}</h5>
+                                <p class="card-text">Brand: <span style="color:orange;">${data[item].brand.slice(0, 1).toUpperCase() + data[item].brand.slice(1)}</span></p>
+                                <p class="card-text">${data[item].description.slice(0,150)}...</p>
+                                <p class="card-text" ><span style="font-size:20px;color:blue;"><strong>${data[item].price} $</strong></span></p>
+                                <p class="card-text"><small class="text-muted"> <strong>Created:</strong> ${data[item].created_at} <br><strong> Update:</strong>${data[item].updated_at}</small></p>
+                                <a  href="${data[item].product_link}" class="btn btn-primary">Explore now</a>
+                                </div>
+                                </div>
+                                </div>
+                                </div>`
+                }
+
+            }
+            if (htmlstr) {
+                makeup.innerHTML = htmlstr;
+
+            }
+            else {
+                makeup.innerHTML = "<h1>No Data Found </h1>"
+            }
+            if (!search) {
+                pushdata(alldata);
+
+            }
+
+        }
+
+
+    </script>
+</body>
+
+</html>
